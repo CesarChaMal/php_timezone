@@ -1,0 +1,130 @@
+index
+<?
+date_default_timezone_set('America/Mexico_City');
+
+
+
+
+registro
+
+        $this->temppais = "MX"; 
+        $this->tempzonahoraria = 11; 
+        $this->tempdst = 1;
+
+
+
+                                      <td align="left" valign="middle" nowrap="nowrap"><?
+                                        $rs = new ResultSet();
+                                        $cbopaises = new ComboBox("listpais",false);
+                                        $cbopaises->createComboBox("class='listMenu' style='background-image: none'");
+                                        $rs = $this->conexion->executeQuery("SELECT codpais,pais
+                                                                                FROM  paises
+                                                                                ORDER BY pais");                                
+                                                                    
+                                        while ($rs->next())
+                                            $cbopaises->addOption($rs->get("codpais"),$rs->get("pais"),($this->temppais == $rs->get("codpais")? true: false));                                    
+                                        $cbopaises->show();
+                                        ?>
+
+
+
+                                      <?                               
+                                        $rs = new ResultSet();
+                                        $cbozonahoraria = new ComboBox("zonahoraria",false);
+                                        $cbozonahoraria->createComboBox("class='ComboBox' style='background-image: none'");
+                                        //$cbozonahoraria->createComboBox("class='ComboBox' STYLE='width: 430px'");
+                                        $cbozonahoraria->onChange("acceso.activateDSTBox(document.forms.FormRegistrar.zonahoraria.value)");
+                                        //onChange="activateDSTBox(document.forms.FormRegistrar.zonahoraria.value
+                                        $rs = $this->conexion->executeQuery("SELECT timezoneid,descripcion FROM timezone WHERE Activo=1 ORDER BY timezoneid");
+                                                                    
+                                        $rs->beforefirst();
+                                        while ($rs->next())
+                                            $cbozonahoraria->addOption($rs->get("timezoneid"),$rs->get("descripcion"),($this->tempzonahoraria == $rs->get("timezoneid")? true: false));
+                                        $cbozonahoraria->show();
+
+                                        //$this->tempzonahoraria = 0; 
+                                        //$timezone = new timezone($this->tempzonahoraria,$this->tempdst);
+                                        //echo "Hora actual: " .$timezone->GetTime(); 
+                                        //$timezone->GetTime(); 
+                                        Application::WriteLn();    
+                                      ?>
+<!--                                      <input type="checkbox" name="DST" unchecked disabled class="checkBox"> Horario de verano -->
+                                      <input type="checkbox" name="DST" checked class="checkBox"> Horario de verano
+                                      </td>
+                                    </tr>
+
+
+                    if($this->tempcorreo == $this->tempccorreo)
+                    {    
+                        $queryUsuarios = "INSERT INTO usuarios (
+                                            usuario,
+                                            password,
+                                            nombres,
+                                            apellidos,
+                                            correo,
+                                            tipo,
+                                            estado,
+                                            ciudad,
+                                            codpais,
+                                            timezoneid,
+                                            dst_offset,
+                                            habilitado) 
+                                        VALUES (
+                                            '".$this->tempusuario."',
+                                            '".$this->tempcontrasenia."',
+                                            '".$this->tempnombres."',
+                                            '".$this->tempapellidos."',
+                                            '".$this->tempcorreo."',
+                                            '1',
+                                            '".$this->tempestado."',
+                                            '".$this->tempciudad."',
+                                            '".$this->temppais."',
+                                            '".$this->tempzonahoraria."',
+                                            '".$this->tempdst."',
+                                            '0')";
+                    
+                        $this->conexion->BeginTransaction();
+                        
+                        //Inserto los datos en la base de datos
+                        if($this->conexion->executeUpdate($queryUsuarios))
+                            $correcto = true;
+                        else
+                        {
+                            $this->mensaje = "No se pudo insertar el nuevo registro, ".$this->conexion->getmsjError()." ".$this->conexion->getnumError();
+                            $correcto = false;
+                        }
+
+                                                 
+                        if($correcto)
+                        {
+                            $query = "SELECT 
+                                           timezone 
+                                    FROM 
+                                         timezone
+                                    WHERE 
+                                          timezoneid='".$this->tempzonahoraria."'";
+                                          
+                            $rs = $this->conexion->executeQuery($query);
+                            
+                            $timezone = $rs->get("timezone");
+                            $currentDate = new Datetime_Now();
+                            putenv("TZ=".$timezone);
+                        }
+
+
+
+
+una vez logeado
+
+            $query = "SELECT 
+                           timezone 
+                    FROM 
+                         detalleusuarios u 
+                    JOIN 
+                         timezone t ON  u.timezoneid=t.timezoneid 
+                    JOIN 
+                         restaurantes r ON  u.idusuario=r.idusuario AND u.usuario=r.usuario
+                    WHERE 
+                          r.rfc='".$this->temprfc."'";
+
+            putenv("TZ=".$timezone);
